@@ -5,20 +5,21 @@ constructor(){
   super()
   this.state={
     _ResultText:"",
-    _CalculatedResult:""
+    _CalculatedResult:"",
+    _ResultState:false,
   }
-  this.Opertion=['Del','+','-','*','/']
+  this.Opertion=['Del','/','*','+','-']
 }
 
   CalculationResult(){
       const text=this.state._ResultText
       this.setState({
-        _CalculatedResult:eval(text)
+        _ResultText:eval(text),
+        _CalculatedResult:""
       })
   }
 
-  ValiditeState(){
-    const text=this.state._ResultText
+  ValiditeState(text){
     switch(text.slice(-1)){
           case '+':
           case '-':
@@ -27,31 +28,55 @@ constructor(){
           return false
     }
     return true
-}
+  }
 
   ButtonPressed(text){
     if(text=='='){
-      return this.ValiditeState() && this.CalculationResult()
+      this.setState({_ResultState:true})
+      return this.ValiditeState(this.state._ResultText) && this.CalculationResult()
     }
+    console.log()
     this.setState({
-      _ResultText:this.state._ResultText+text
+      _ResultState:false,
+      _ResultText:this.state._ResultText.toString()+text,
+      _CalculatedResult:eval(this.state._ResultText.toString()+text )
     })
+   
   }
 
   OperationPressed(Operation){
+    this.setState({_ResultState:false})
       switch(Operation){
         case 'Del':
-                  let TempText=this.state._ResultText.split('')
-                  TempText.pop()
-                  this.setState({
-                    _ResultText:TempText.join('')
-                  })
+                  if(this.state._ResultState){
+                    this.setState({
+                      _ResultText:"",
+                      _CalculatedResult:""
+                    })
+                  }
+                  else{
+                    let TempText=this.state._ResultText.split('')
+                    TempText.pop()
+                    this.setState({
+                      _ResultText:TempText.join('')
+                    })
+                   if(!this.ValiditeState(TempText.join(''))){
+                      this.setState({
+                        _CalculatedResult:""
+                      })
+                    }
+                    else{
+                      this.setState({
+                        _CalculatedResult:eval(TempText.join(''))
+                      })
+                    }
+                  }
                   break
         case '+':
         case '-':
         case '*':
         case '/':
-                  const LastChar=this.state._ResultText.split('').pop()
+                  const LastChar=this.state._ResultText.toString().split('').pop()
                   if(this.Opertion.indexOf(LastChar)>0)return
                   if(this.state._ResultText=="") return
                   this.setState({
@@ -115,13 +140,13 @@ const styles = StyleSheet.create({
     alignItems:'flex-end',
   },
   ResultText:{
-      fontSize:30,
+      fontSize:50,
       color:'black'
   },
-CalculationText:{
-    fontSize:25,
+  CalculationText:{
+    fontSize:35,
     color:'black',
-},
+  },
   Calculation:{
     flex:1,
     backgroundColor:'white',
